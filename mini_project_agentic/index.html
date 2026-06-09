@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toulouse Weather // NEON GRID</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --bg-card: #0f0f1a;
+      --cyan: #00f0ff;
+      --pink: #ff2a6d;
+      --yellow: #fcee0a;
+      --purple: #9d4edd;
+      --text: #e0e0ff;
+      --text-dim: #6b6b8a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      font-family: "Share Tech Mono", monospace;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255, 42, 109, 0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: min(420px, 92vw);
+      padding: 2rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--cyan);
+      border-radius: 4px;
+      padding: 2rem;
+      position: relative;
+      box-shadow:
+        0 0 20px rgba(0, 240, 255, 0.3),
+        0 0 60px rgba(0, 240, 255, 0.1),
+        inset 0 0 30px rgba(0, 240, 255, 0.03);
+      animation: borderPulse 4s ease-in-out infinite;
+    }
+
+    .card::before,
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: var(--pink);
+      border-style: solid;
+    }
+
+    .card::before {
+      top: -1px;
+      left: -1px;
+      border-width: 2px 0 0 2px;
+      box-shadow: -2px -2px 8px var(--pink);
+    }
+
+    .card::after {
+      bottom: -1px;
+      right: -1px;
+      border-width: 0 2px 2px 0;
+      box-shadow: 2px 2px 8px var(--pink);
+    }
+
+    @keyframes borderPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1), inset 0 0 30px rgba(0, 240, 255, 0.03); }
+      50% { box-shadow: 0 0 30px rgba(255, 42, 109, 0.4), 0 0 80px rgba(0, 240, 255, 0.15), inset 0 0 40px rgba(255, 42, 109, 0.04); }
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .city {
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--yellow);
+      text-shadow:
+        0 0 10px var(--yellow),
+        0 0 30px rgba(252, 238, 10, 0.5);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan), 0 0 16px var(--cyan);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .temp-section {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    .weather-icon {
+      font-size: 4rem;
+      filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.6));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .temp-value {
+      font-family: "Orbitron", sans-serif;
+      font-size: 4.5rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow:
+        0 0 10px var(--cyan),
+        0 0 40px rgba(0, 240, 255, 0.4);
+      line-height: 1;
+    }
+
+    .temp-unit {
+      font-size: 1.5rem;
+      color: var(--text-dim);
+      vertical-align: super;
+    }
+
+    .condition {
+      font-size: 0.95rem;
+      color: var(--pink);
+      text-shadow: 0 0 8px rgba(255, 42, 109, 0.6);
+      margin-top: 0.3rem;
+      letter-spacing: 0.05em;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .stat-box {
+      background: rgba(0, 240, 255, 0.04);
+      border: 1px solid rgba(0, 240, 255, 0.25);
+      border-radius: 2px;
+      padding: 1rem;
+      position: relative;
+      transition: box-shadow 0.3s;
+    }
+
+    .stat-box:hover {
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+
+    .stat-box.rain {
+      border-color: rgba(255, 42, 109, 0.35);
+      background: rgba(255, 42, 109, 0.04);
+    }
+
+    .stat-box.rain:hover {
+      box-shadow: 0 0 15px rgba(255, 42, 109, 0.2);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--yellow);
+      text-shadow: 0 0 8px rgba(252, 238, 10, 0.4);
+    }
+
+    .stat-box.rain .stat-value {
+      color: var(--pink);
+      text-shadow: 0 0 8px rgba(255, 42, 109, 0.5);
+    }
+
+    .rain-bar {
+      margin-top: 0.6rem;
+      height: 4px;
+      background: rgba(255, 42, 109, 0.15);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .rain-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--pink), var(--purple));
+      box-shadow: 0 0 8px var(--pink);
+      border-radius: 2px;
+      transition: width 1s ease;
+      width: 0%;
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .footer span {
+      color: var(--cyan);
+      text-shadow: 0 0 6px rgba(0, 240, 255, 0.4);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .loading-text {
+      font-family: "Orbitron", sans-serif;
+      font-size: 0.9rem;
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+      animation: pulse 1.5s ease-in-out infinite;
+      letter-spacing: 0.2em;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .error {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--pink);
+      text-shadow: 0 0 10px rgba(255, 42, 109, 0.5);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div id="loading" class="loading">
+        <p class="loading-text">// SYNCING DATA...</p>
+      </div>
+
+      <div id="error" class="error hidden"></div>
+
+      <div id="weather" class="hidden">
+        <div class="header">
+          <h1 class="city">Toulouse</h1>
+          <div class="status-dot" title="Live data"></div>
+        </div>
+
+        <div class="temp-section">
+          <span id="icon" class="weather-icon">🌡️</span>
+          <div>
+            <div class="temp-value">
+              <span id="temperature">--</span><span class="temp-unit">°C</span>
+            </div>
+            <p id="condition" class="condition">--</p>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-box">
+            <p class="stat-label">// Windspeed</p>
+            <p class="stat-value"><span id="windspeed">--</span> <small style="font-size:0.6em;color:var(--text-dim)">km/h</small></p>
+          </div>
+          <div class="stat-box rain">
+            <p class="stat-label">// Rain Prob.</p>
+            <p class="stat-value"><span id="rain">--</span>%</p>
+            <div class="rain-bar">
+              <div id="rain-bar-fill" class="rain-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="footer">DATA SOURCE: <span>OPEN-METEO API</span> // LIVE FEED</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOULOUSE_LAT = 43.6047;
+    const TOULOUSE_LON = 1.4442;
+
+    const WMO_DESCRIPTIONS = {
+      0: "Clear sky",
+      1: "Mainly clear",
+      2: "Partly cloudy",
+      3: "Overcast",
+      45: "Fog",
+      48: "Depositing rime fog",
+      51: "Light drizzle",
+      53: "Moderate drizzle",
+      55: "Dense drizzle",
+      56: "Light freezing drizzle",
+      57: "Dense freezing drizzle",
+      61: "Slight rain",
+      63: "Moderate rain",
+      65: "Heavy rain",
+      66: "Light freezing rain",
+      67: "Heavy freezing rain",
+      71: "Slight snow fall",
+      73: "Moderate snow fall",
+      75: "Heavy snow fall",
+      77: "Snow grains",
+      80: "Slight rain showers",
+      81: "Moderate rain showers",
+      82: "Violent rain showers",
+      85: "Slight snow showers",
+      86: "Heavy snow showers",
+      95: "Thunderstorm",
+      96: "Thunderstorm with slight hail",
+      99: "Thunderstorm with heavy hail",
+    };
+
+    const WMO_ICONS = {
+      0: "☀️",
+      1: "🌤️",
+      2: "⛅",
+      3: "☁️",
+      45: "🌫️",
+      48: "🌫️",
+      51: "🌦️",
+      53: "🌦️",
+      55: "🌧️",
+      56: "🌧️",
+      57: "🌧️",
+      61: "🌧️",
+      63: "🌧️",
+      65: "🌧️",
+      66: "🌧️",
+      67: "🌧️",
+      71: "❄️",
+      73: "❄️",
+      75: "❄️",
+      77: "❄️",
+      80: "🌦️",
+      81: "🌦️",
+      82: "⛈️",
+      85: "🌨️",
+      86: "🌨️",
+      95: "⛈️",
+      96: "⛈️",
+      99: "⛈️",
+    };
+
+    function describeWeather(code) {
+      return WMO_DESCRIPTIONS[code] ?? `Unknown (code ${code})`;
+    }
+
+    function weatherIcon(code) {
+      return WMO_ICONS[code] ?? "🌡️";
+    }
+
+    function getCurrentHourRainProbability(currentWeatherTime, hourly) {
+      const hourPrefix = currentWeatherTime.slice(0, 13);
+      const index = hourly.time.findIndex((time) => time.startsWith(hourPrefix));
+
+      if (index === -1) {
+        throw new Error("Could not find hourly rain probability for the current hour");
+      }
+
+      return hourly.precipitation_probability[index];
+    }
+
+    function showError(message) {
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("weather").classList.add("hidden");
+      const errorEl = document.getElementById("error");
+      errorEl.textContent = `// ERROR: ${message}`;
+      errorEl.classList.remove("hidden");
+    }
+
+    function showWeather(data) {
+      const { time, temperature, windspeed, weathercode } = data.current_weather;
+      const rainProbability = getCurrentHourRainProbability(time, data.hourly);
+
+      document.getElementById("icon").textContent = weatherIcon(weathercode);
+      document.getElementById("temperature").textContent = temperature;
+      document.getElementById("condition").textContent = describeWeather(weathercode);
+      document.getElementById("windspeed").textContent = windspeed;
+      document.getElementById("rain").textContent = rainProbability;
+      document.getElementById("rain-bar-fill").style.width = `${rainProbability}%`;
+
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("weather").classList.remove("hidden");
+    }
+
+    async function fetchWeather() {
+      const url = new URL("https://api.open-meteo.com/v1/forecast");
+      url.searchParams.set("latitude", String(TOULOUSE_LAT));
+      url.searchParams.set("longitude", String(TOULOUSE_LON));
+      url.searchParams.set("current_weather", "true");
+      url.searchParams.set("hourly", "precipitation_probability");
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`API request failed (${response.status})`);
+      }
+
+      return response.json();
+    }
+
+    fetchWeather()
+      .then(showWeather)
+      .catch((error) => showError(error.message));
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "toulouse-weather",
+  "version": "1.0.0",
+  "description": "Fetch current weather for Toulouse using the Open-Meteo API",
+  "main": "weather.js",
+  "type": "module",
+  "scripts": {
+    "start": "node weather.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
